@@ -41,7 +41,7 @@ __Jae-Un Lee:__ The master's course student. Interest in Machine Learning, Perce
 ---
 <img src="./imgs/HDMAP.png" width="700" height="300">
 
-판단 알고리즘을 설계함에 앞서 저희는 HD Map을 활용하였습니다. Map 제공은 [국토지리정보원](https://www.ngii.go.kr/kor/main.do) 에서 제공 받을 수 있으며, [dbf, prj, dbn, sbx, shp] 등의 파일 형식으로 저장된다.
+판단 알고리즘을 설계함에 앞서 저희는 HD Map을 활용하였다. Map 제공은 [국토지리정보원](https://www.ngii.go.kr/kor/main.do) 에서 제공 받을 수 있으며, [dbf, prj, dbn, sbx, shp] 등의 파일 형식으로 저장된다.
 개발에 사용하고자 하는 지도 포맷인 osm 파일로 변환하기 위해, [JOSM](https://josm.openstreetmap.de/wiki/Download) 을 이용하여 shp를 osm으로 변환하였다.
 하지만 기본적으로 JOSM은 shp 파일을 지원하지 않기 때문에, 플러그인 설치로 해결한다. 방법은 (Open JOSM -> Edit -> Preferences -> Plugins -> Search에 'opendata'를 입력하여 설치) 로 진행하며,
 shp를 open하고 File -> Save As 버튼을 눌러 osm으로 변환 저장한다.
@@ -99,7 +99,6 @@ Local Path Planning은 Frenet Frame과 Jerk Minimization을 활용한 [Trajector
 Global Path Planning은 한번 동작하며, Local Path Planning은 상시 동작한다. 이 과정에서 출력되는 데이터는 제어 시스템에 전달하기 위한 위도, 경도, 고도 및 정지 좌표의 위도, 경도이다.
 
 제어 시스템에 주기 위한 다음 좌표 (위도, 경도)는 속도를 기반으로 Lookahead에 맞추어 좌표를 추출하여 송신한다. 마찬가지로 정지 좌표는 상시 전달된다.
-
 
 ## 참고사항
 

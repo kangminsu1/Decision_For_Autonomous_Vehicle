@@ -12,7 +12,7 @@
 |<img src="./imgs/minsu.JPG" alt="Min-Su Kang" width="150" height="150"> | - |Min-Su Kang|ziz1945@naver.com|
 |<img src="./imgs/donghack.JPG" alt="Dong-Hyuk Park" width="150" height="150"> | - |Dong-Hyuk Park|qkrehdgursla@gmail.com|
 |<img src="./imgs/DongJoo.JPG" alt="Dong-Joo Lee" width="150" height="150"> | - |Dong-Joo Lee|djkang1ee@naver.com|
-|<img src="./imgs/jaewoon.JPG" alt="Jae-Un Lee" width="150" height="150"> | - |Jae-Un Lee|moc06207@naver.com|
+|<img src="./imgs/jaewoon.jpg" alt="Jae-Un Lee" width="150" height="150"> | - |Jae-Un Lee|moc06207@naver.com|
 
 ### Introduction
 __Sang-Hoon Ahn:__ The Ph.D. student. Interest in Control, Communication(CAN, UDP, TCP/IP..etc) and Autonomous Driving.

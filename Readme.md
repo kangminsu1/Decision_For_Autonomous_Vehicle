@@ -1,7 +1,7 @@
 # Decision Algorithm for Autonomous Vehicle
 
 ---
-## [Temporary Drive's License]
+## Temporary Drive's License
 
 ## Team
 

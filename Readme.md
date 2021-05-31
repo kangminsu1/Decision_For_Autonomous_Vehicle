@@ -324,6 +324,8 @@ next_lat, next_lon, next_alt = pm.enu2geodetic(path.x[num], path.y[num], center[
 
 <img src="./imgs/LPP_results.png" width="400" height="300"> <img src="./imgs/LPP_results2.png" width="400" height="300">
 
+#### 참조: [Trajectory Planning in the Frenet Space](https://fjp.at/posts/optimal-frenet/), [PythonRobotics](https://github.com/AtsushiSakai/PythonRobotics)
+
 ## Detecting Stop Line
 
 ---

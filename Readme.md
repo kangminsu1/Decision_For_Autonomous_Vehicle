@@ -248,9 +248,7 @@ status, route = router.doRoute(start, end)
 ## Local Path Planning
 
 ---
-<img src="./imgs/LPP1.png" width="400" height="300">
-
-<img src="./imgs/LPP2.png" width="400" height="300">
+<img src="./imgs/LPP1.png" width="400" height="300"> <img src="./imgs/LPP2.png" width="400" height="300">
 
 Local Path Planning은 Frenet Frame과 Jerk Minimization을 활용한 [Trajectory Planning in the Frenet Space](https://fjp.at/posts/optimal-frenet/) 을 참조하여 개발되었다. 
 

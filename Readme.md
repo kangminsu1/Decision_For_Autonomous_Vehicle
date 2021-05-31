@@ -9,10 +9,10 @@
 |     Image              |     Role      |      Name      |     email   |
 |------------------------|---------------|----------------|-------------|
 |<img src="./imgs/sanhoon.JPG" alt="Sang-Hoon Ahn" width="150" height="150"> |__Lead__|Sang-Hoon Ahn|22171365@inha.edu|
-|<img src="./imgs/minsu.JPG" alt="Min-Su Kang" width="150" height="150"> | - |Min-Su Kang|ziz1945@naver.com|
-|<img src="./imgs/donghack.JPG" alt="Dong-Hyuk Park" width="150" height="150"> | - |Dong-Hyuk Park|qkrehdgursla@gmail.com|
-|<img src="./imgs/DongJoo.JPG" alt="Dong-Joo Lee" width="150" height="150"> | - |Dong-Joo Lee|djkang1ee@naver.com|
-|<img src="./imgs/jaewoon.jpg" alt="Jae-Un Lee" width="150" height="150"> | - |Jae-Un Lee|moc06207@naver.com|
+|<img src="./imgs/minsu.JPG" alt="Min-Su Kang" width="150" height="150"> | __Decision__ |Min-Su Kang|ziz1945@naver.com|
+|<img src="./imgs/donghack.JPG" alt="Dong-Hyuk Park" width="150" height="150"> | __Control__ |Dong-Hyuk Park|qkrehdgursla@gmail.com|
+|<img src="./imgs/DongJoo.JPG" alt="Dong-Joo Lee" width="150" height="150"> | __Perception (Lidar)__ |Dong-Joo Lee|djkang1ee@naver.com|
+|<img src="./imgs/jaewoon.jpg" alt="Jae-Un Lee" width="150" height="150"> | __Perception (Camera)__ |Jae-Un Lee|moc06207@naver.com|
 
 ### Introduction
 __Sang-Hoon Ahn:__ The Ph.D. student. Interest in Control, Communication(CAN, UDP, TCP/IP..etc) and Autonomous Driving.

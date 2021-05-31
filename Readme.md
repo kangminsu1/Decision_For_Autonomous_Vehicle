@@ -103,7 +103,8 @@ both_change = [] #양쪽으로 차선 변경이 가능할 경우
 
 ARTIV_osm_formatter를 실행시킨 최종 결과는 위와 같다. 왼쪽은 원본 A2_LINK.osm파일이고, 오른쪽은 output파일이다. 노드가 촘촘해지고, 차로 변경 way가 추가되었음을 알 수 있다.
 
-<img src="./imgs/raw.PNG" width="400" height="400"> <img src="./imgs/conversion.PNG" width="400" height="400">
+<img src="./imgs/raw.PNG" width="400" height="400">
+<img src="./imgs/conversion.PNG" width="400" height="400">
 
 
 ### Usage
@@ -252,6 +253,78 @@ status, route = router.doRoute(start, end)
 
 Local Path Planning은 Frenet Frame과 Jerk Minimization을 활용한 [Trajectory Planning in the Frenet Space](https://fjp.at/posts/optimal-frenet/) 을 참조하여 개발되었다. 
 
+### Initialize
+
+Global Path Planning으로 인해 생성된 최단 경로를 기반으로 차량이 종방향 및 횡방향을 순조롭게 진행하도록 하단의 함수를 실행한다. 이는 Cubic Spline Curvature를 사용하는 Cubic Spline Planner를 사용하며, x, y, curvature, yaw, 총 좌표에 대한 index를 반환한다.
+Local Path Planning (Frenet Frame Algorithm)을 사용하기에 앞서 lateral position, speed, acceleration을 초기에 0으로 설정한다. 
+```
+dx, dy, dyaw, dk, s = get_course(result_path[:, 0], result_path[:, 1]) # X, Y Yaw, Curvature, Index
+```
+```
+c_d = 0.0  # current lateral position [m]
+c_d_d = 0.0  # current lateral speed [m/s]
+c_d_dd = 0.0  # current lateral acceleration [m/s]
+```
+### Implementation
+
+현재 위치를 CAN으로 수신받는 실시간 환경에서, 현재 위치를 바탕으로 최소 Euclidean distance를 가진 index를 's' parameter를 통해 반환한다.
+그리고 아래의 함수를 통해 Frenet Optimal Trajectory Algorithm을 실행시킨다.
+```
+path = frenet_optimal_planning(s, s0, velocity.value, c_d, c_d_d, c_d_dd, obstacle)
+```
+path class parameter가 상시 업데이트 되는 상황에서, path에 있는 데이터를 기반으로 기존의 lateral position, speed, acceleration을 상시 업데이트 한다.
+```
+c_d = path.d[1]
+c_d_d = path.d_d[1]
+c_d_dd = path.d_dd[1]
+```
+
+또한 전역변수로 MAX_SPEED, MAX_ACCEL, MAX_CURVATURE 등이 설정되어 있으며, check_collision 함수를 통해 전방에 있는 obstacle을 감지하여 그 후의 Local Path Planning을 수행한다. 만약 주행 중 Speed, Acceleration, Curvature가 기존 전역 변수보다 높으면 아래와 같이 Warning 신호를 주며, Obstacle 또한 TTC Zone에 들어올 경우 Warning 신호를 생성한다.
+```
+if Out_of_speed == True:
+    print("[Speed] -> Out of the Max")
+    Out_of_speed = False
+
+if Out_of_accel == True:
+    print("[Accel] -> Out of the Max")
+    Out_of_accel = False
+
+if Out_of_curvature == True:
+    print("[Curvature] -> Out of the Max")
+    Out_of_curvature = False
+
+if Warning_obstacle == True:
+    print("[WARNING] -> Obstacle")
+    Warning_obstacle = False
+```
+
+그리고 입력되는 velocity를 바탕으로 자동차 제동 거리 공식을 활용하여, 현재 지점과 목표 지점의 차이가 자동차 제동 거리보다 작다면 Local Path Planning Loop를 빠져나오도록 설계하였다.
+```
+break_distance = round(0.0005 * math.pow(velocity.value * 3.6, 2) + 0.2 * (velocity * 3.6), 3)
+comp_end = np.hypot(path.x[1] - dx[-1], path.y[1] - dy[-1])
+# 자동차 제동 거리와 비교해서 다달으면 모든 코드 break
+if comp_end <= break_distance:
+    print("Goal!")
+    ALL_STOP.value = 1
+    break
+```
+결론적으로 Local Path Planning을 하기 위해 Frenet Frame Optimal Trajectory 알고리즘을 활용하였으며, 상시 입력되는 데이터는 현재 차량의 좌표 및 속도, 인지 센서로부터 수신되는 장애물 좌표를 기반으로 다음 지점에 대한 좌표를 출력한다.
+다음 좌표는 현재 속도를 바탕으로 Lookahead를 계산하고 현재 좌표와의 거리를 비교하여 가장 거리가 비슷한 거리의 좌표를 반환한다.
+```
+lookahead = velocity.value * 0.2 + 4.5
+num = 0
+for i in range(len(path.x)):
+    distance = np.hypot(path.x[i] - path.x[0], path.y[i] - path.y[0])
+    dists = distance - lookahead
+    if dists > 0:
+        num = i
+        break
+next_lat, next_lon, next_alt = pm.enu2geodetic(path.x[num], path.y[num], center[2], center[0], center[1], center[2]) #ENU to LLH
+```
+아래의 왼쪽 그림은 주행 중 전방에 Obstacle을 회피하는 과정을 나타낸 것이며, 우측은 각 Obstacle을 회피하여 주행한 궤적의 결과를 나타낸다.
+
+<img src="./imgs/LPP_results.png" width="400" height="300"> <img src="./imgs/LPP_results2.png" width="400" height="300">
+
 ## Detecting Stop Line
 
 ---
@@ -282,6 +355,9 @@ Local Path Planning은 Frenet Frame과 Jerk Minimization을 활용한 [Trajector
 깜빡이는 신호가 생성됨과 동시에 start_time이 reset되며, end_time과 비교하여 1~2초가 지난 뒤, 전방에 하나의 obstacle을 생성하여 이를 회피하는 Trajectory로 구현되어 있다. 또한, 왼쪽 및 오른쪽으로 Trajectory로 변경한 뒤,
 바뀐 차선으로 계속 주행시키기 위해 전역변수로 설정된 'MAX_LEFT_WIDTH'와 'MAX_LEFT_WIDTH'이 변경된다. 이 Parameter는 'temp_light' 변수에 따라 변경된다.
 
+하단의 왼쪽 그림은 Turn Right Signal을 받았을 경우, 오른쪽 그림은 Turn Left Signal을 받았을 경우를 나타낸 그림이다.
+
+<img src="./imgs/turn_light_right.png" width="400" height="300"> <img src="./imgs/turn_light_left.png" width="400" height="300">
 
 ## Output
 

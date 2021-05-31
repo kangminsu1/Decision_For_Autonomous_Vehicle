@@ -344,6 +344,66 @@ def get_course(x, y):
 
     return rx, ry, ryaw, rk, csp
 
+# Plotting Vehicle-------------------------
+def plot_car(x, y, yaw=0.0, WIDTH=1.53, LENGTH=4.37, steer=0.0, cabcolor="-r", truckcolor="-k",
+             BACKTOWHEEL=1.0, WHEEL_LEN=0.15, WHEEL_WIDTH=0.05, TREAD=0.7, WB=2.5):
+
+    outline = np.array([[-BACKTOWHEEL, (LENGTH - BACKTOWHEEL), (LENGTH - BACKTOWHEEL), -BACKTOWHEEL, -BACKTOWHEEL],
+                        [WIDTH / 2, WIDTH / 2, - WIDTH / 2, -WIDTH / 2, WIDTH / 2]])
+
+    fr_wheel = np.array([[WHEEL_LEN, -WHEEL_LEN, -WHEEL_LEN, WHEEL_LEN, WHEEL_LEN],
+                         [-WHEEL_WIDTH - TREAD, -WHEEL_WIDTH - TREAD, WHEEL_WIDTH - TREAD, WHEEL_WIDTH - TREAD,
+                          -WHEEL_WIDTH - TREAD]])
+
+    rr_wheel = np.copy(fr_wheel)
+
+    fl_wheel = np.copy(fr_wheel)
+    fl_wheel[1, :] *= -1
+    rl_wheel = np.copy(rr_wheel)
+    rl_wheel[1, :] *= -1
+
+    Rot1 = np.array([[math.cos(yaw), math.sin(yaw)],
+                     [-math.sin(yaw), math.cos(yaw)]])
+    Rot2 = np.array([[math.cos(steer), math.sin(steer)],
+                     [-math.sin(steer), math.cos(steer)]])
+
+    fr_wheel = (fr_wheel.T.dot(Rot2)).T
+    fl_wheel = (fl_wheel.T.dot(Rot2)).T
+    fr_wheel[0, :] += WB
+    fl_wheel[0, :] += WB
+
+    fr_wheel = (fr_wheel.T.dot(Rot1)).T
+    fl_wheel = (fl_wheel.T.dot(Rot1)).T
+
+    outline = (outline.T.dot(Rot1)).T
+    rr_wheel = (rr_wheel.T.dot(Rot1)).T
+    rl_wheel = (rl_wheel.T.dot(Rot1)).T
+
+    outline[0, :] += x
+    outline[1, :] += y
+    fr_wheel[0, :] += x
+    fr_wheel[1, :] += y
+    rr_wheel[0, :] += x
+    rr_wheel[1, :] += y
+    fl_wheel[0, :] += x
+    fl_wheel[1, :] += y
+    rl_wheel[0, :] += x
+    rl_wheel[1, :] += y
+
+    plt.plot(np.array(outline[0, :]).flatten(),
+             np.array(outline[1, :]).flatten(), truckcolor)
+    plt.plot(np.array(fr_wheel[0, :]).flatten(),
+             np.array(fr_wheel[1, :]).flatten(), truckcolor)
+    plt.plot(np.array(rr_wheel[0, :]).flatten(),
+             np.array(rr_wheel[1, :]).flatten(), truckcolor)
+    plt.plot(np.array(fl_wheel[0, :]).flatten(),
+             np.array(fl_wheel[1, :]).flatten(), truckcolor)
+    plt.plot(np.array(rl_wheel[0, :]).flatten(),
+             np.array(rl_wheel[1, :]).flatten(), truckcolor)
+    plt.plot(x, y, "ok", label="My Vehicle", markersize=5)
+
+    return outline
+
 # Receive all information by can------------------------------------------------
 def My_Position(current_lat, current_lon, ALL_STOP):
     channel_num = find_channel(1) # Find channel with CAN
@@ -446,6 +506,17 @@ def gpp2lpp(velocity, current_lat, current_lon, light, ALL_STOP):
         for latlon in routeLatLons:
             result_path.append([float(latlon[0]), float(latlon[1])])
         result_path = np.array(result_path)
+
+        # plotting Coordination------------------------------------------ option
+        plt.title("Global Path Planning")
+        plt.plot(Coordination[:, 1], Coordination[:, 0], '*b', label="HD Map")
+        plt.plot(result_path[:, 1], result_path[:, 0], '--r', linewidth=3, label='Generated Path Trajectory')
+        plt.plot(result_path[0, 1], result_path[0, 0], 'Xm', markersize=10, label="Start Point")
+        plt.plot(result_path[-1, 1], result_path[-1, 0], 'Xg', markersize=10, label="End Point")
+        plt.plot(stop_line[:, 1], stop_line[:, 0], 'ok', markersize=5, label="Stop Lines")
+        plt.legend()
+        plt.show()
+        # plotting Coordination------------------------------------------ option
 
         center = sum(Coordination) / len(Coordination) # Calculate ENU Center For Convert other LLH Data to ENU
 
@@ -585,8 +656,17 @@ def gpp2lpp(velocity, current_lat, current_lon, light, ALL_STOP):
 
             heading = math.atan2(path.x[1] - path.x[0], path.y[1] - path.y[0]) * 180 / math.pi + 180 # 현재 값과 다음 값의 방향을 비교해서 Heading값 추출하기
             # update my coordination ---------------------------------
-            next_lat, next_lon, next_alt = pm.enu2geodetic(path.x[1], path.y[1], center[2], center[0], center[1], center[2]) #ENU to LLH
-            comp_end = np.hypot(path.x[1] - dx[-1], path.y[1] - dy[-1])
+
+            # Find next Coordination based on Lookahead=====================================================================
+            lookahead = velocity.value * 0.2 + 4.5
+            num = 0
+            for i in range(len(path.x)):
+                distance = np.hypot(path.x[i] - path.x[0], path.y[i] - path.y[0])
+                dists = distance - lookahead
+                if dists > 0:
+                    num = i
+                    break
+            next_lat, next_lon, next_alt = pm.enu2geodetic(path.x[num], path.y[num], center[2], center[0], center[1], center[2]) #ENU to LLH
 
             # stop line 찾는 법은 간단하게 코사인 유사도 거리 방법 및 유클라디안 거리 검출 사용함====================
             INDEXS = {}
@@ -646,7 +726,7 @@ def gpp2lpp(velocity, current_lat, current_lon, light, ALL_STOP):
 
             # 자동차 제동 거리 공식
             break_distance = round(0.0005 * math.pow(velocity.value * 3.6, 2) + 0.2 * (velocity * 3.6), 3)
-
+            comp_end = np.hypot(path.x[1] - dx[-1], path.y[1] - dy[-1])
             # 자동차 제동 거리와 비교해서 다달으면 모든 코드 break
             if comp_end <= break_distance:
                 print("Goal!")
@@ -668,7 +748,7 @@ def gpp2lpp(velocity, current_lat, current_lon, light, ALL_STOP):
                     plt.plot(obstacle[:, 0], obstacle[:, 1], "or", markersize=6)
                 # line of the LPP
                 plt.plot(path.x[1:], path.y[1:], "-og", linewidth=2)
-                plt.plot(path.x[1], path.y[1], "vc", markersize=3)
+                plot_car(path.x[1], path.y[1], radian)
                 plt.plot(traffic_all[:, 0], traffic_all[:, 1], '*y')
                 plt.plot(traffic_all[POINT][0], traffic_all[POINT][1], 'Xm', markersize=10)
                 # ROI

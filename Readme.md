@@ -8,7 +8,7 @@
 ---
 |     Image              |     Role      |      Name      |     email   |
 |------------------------|---------------|----------------|-------------|
-|<img src="./imgs/sanhoon.JPG" alt="Sang-Hoon Ahn" width="150" height="150"> |__Lead__, __HW__, __Communication__|Sang-Hoon Ahn|22171365@inha.edu|
+|<img src="./imgs/sanhoon.JPG" alt="Sang-Hoon Ahn" width="150" height="150"> |__Lead__, __H/W__, __Communication__|Sang-Hoon Ahn|22171365@inha.edu|
 |<img src="./imgs/minsu.JPG" alt="Min-Su Kang" width="150" height="150"> | __Decision__ |Min-Su Kang|ziz1945@naver.com|
 |<img src="./imgs/donghack.JPG" alt="Dong-Hyuk Park" width="150" height="150"> | __Control__ |Dong-Hyuk Park|qkrehdgursla@gmail.com|
 |<img src="./imgs/DongJoo.JPG" alt="Dong-Joo Lee" width="150" height="150"> | __Perception (Lidar)__ |Dong-Joo Lee|djkang1ee@naver.com|

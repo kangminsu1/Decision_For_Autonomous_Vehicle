@@ -49,7 +49,7 @@ shp를 open하고 File -> Save As 버튼을 눌러 osm으로 변환 저장한다
 ## Global Path Planning
 
 ---
-<img src="./imgs/GPP.png" width="400" height="600">
+<img src="./imgs/GPPs.png" width="400" height="600">
 
 #### Global Path Planning은 Python Code로 진행되었으며, [Pyroutelib3](https://github.com/MKuranowski/pyroutelib3) Library를 활용하여 진행되었다. 또한 DGIST ARTIV Lab.의 [Let's Do Global Path Planning!](https://dgist-artiv.github.io/hdmap/2021/02/15/artiv-pyroutelib3.html) 을 참고하여 Path Planning을 진행하였다.
 

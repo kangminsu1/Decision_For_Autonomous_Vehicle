@@ -103,8 +103,7 @@ both_change = [] #양쪽으로 차선 변경이 가능할 경우
 
 ARTIV_osm_formatter를 실행시킨 최종 결과는 위와 같다. 왼쪽은 원본 A2_LINK.osm파일이고, 오른쪽은 output파일이다. 노드가 촘촘해지고, 차로 변경 way가 추가되었음을 알 수 있다.
 
-<img src="./imgs/raw.PNG" width="400" height="400">
-<img src="./imgs/conversion.PNG" width="400" height="400">
+<img src="./imgs/raw.PNG" width="400" height="400"> <img src="./imgs/conversion.PNG" width="400" height="400">
 
 
 ### Usage

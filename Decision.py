@@ -657,17 +657,6 @@ def gpp2lpp(velocity, current_lat, current_lon, light, ALL_STOP):
             heading = math.atan2(path.x[1] - path.x[0], path.y[1] - path.y[0]) * 180 / math.pi + 180 # 현재 값과 다음 값의 방향을 비교해서 Heading값 추출하기
             # update my coordination ---------------------------------
 
-            # Find next Coordination based on Lookahead=====================================================================
-            lookahead = velocity.value * 0.2 + 4.5
-            num = 0
-            for i in range(len(path.x)):
-                distance = np.hypot(path.x[i] - path.x[0], path.y[i] - path.y[0])
-                dists = distance - lookahead
-                if dists > 0:
-                    num = i
-                    break
-            next_lat, next_lon, next_alt = pm.enu2geodetic(path.x[num], path.y[num], center[2], center[0], center[1], center[2]) #ENU to LLH
-
             # stop line 찾는 법은 간단하게 코사인 유사도 거리 방법 및 유클라디안 거리 검출 사용함====================
             INDEXS = {}
             point = np.array([path.x[0], path.y[0]])
@@ -690,6 +679,18 @@ def gpp2lpp(velocity, current_lat, current_lon, light, ALL_STOP):
             stop_lat, stop_lon, stop_h = pm.enu2geodetic(traffic_all[POINT][0], traffic_all[POINT][1], center[2],
                                                          center[0], center[1], center[2])
             # stop line 찾는 법은 간단하게 코사인 유사도 거리 방법 및 유클라디안 거리 검출 사용함====================
+            
+            # Find next Coordination based on Lookahead=====================================================================
+            lookahead = velocity.value * 0.2 + 4.5
+            num = 0
+            for i in range(len(path.x)):
+                distance = np.hypot(path.x[i] - path.x[0], path.y[i] - path.y[0])
+                dists = distance - lookahead
+                if dists > 0:
+                    num = i
+                    break
+            next_lat, next_lon, next_alt = pm.enu2geodetic(path.x[num], path.y[num], center[2], center[0], center[1], center[2]) #ENU to LLH
+
 
             # tx버퍼 클리어 구문
             # 실제 실험할 때 키는 구문=-===========================================

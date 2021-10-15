@@ -690,10 +690,10 @@ def gpp2lpp(velocity, current_lat, current_lon, light, ALL_STOP):
                     num = i
                     break
             next_lat, next_lon, next_alt = pm.enu2geodetic(path.x[num], path.y[num], center[2], center[0], center[1], center[2]) #ENU to LLH
-
-
+            # Find next Coordination based on Lookahead=====================================================================
+            
             # tx버퍼 클리어 구문
-            # 실제 실험할 때 키는 구문=-===========================================
+            # 실제 실험할 때 키는 구문 (제어 프로세스에 송신)==============================
             canlib.IOControl(Channel).flush_tx_buffer()
             Wave_Path_Next_Lat_sig.Wave_Path_Next_Lat.phys = round(float(next_lat), 8)
             Channel.write(Wave_Path_Next_Lat_sig._frame)
@@ -705,7 +705,7 @@ def gpp2lpp(velocity, current_lat, current_lon, light, ALL_STOP):
             Channel.write(Wave_StopLine_Lat_sig._frame)
             Wave_StopLine_Long_sig.Wave_StopLine_Long.phys = float(stop_lon)
             Channel.write(Wave_StopLine_Long_sig._frame)
-            # 실제 실험할 때 키는 구문=-===========================================
+            # 실제 실험할 때 키는 구문 (제어 프로세스에 송신)==============================
 
             # Warning Alert=================================
             if Out_of_speed == True:

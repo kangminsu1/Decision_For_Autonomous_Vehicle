@@ -689,7 +689,8 @@ def gpp2lpp(velocity, current_lat, current_lon, light, ALL_STOP):
                 if dists > 0:
                     num = i
                     break
-            next_lat, next_lon, next_alt = pm.enu2geodetic(path.x[num], path.y[num], center[2], center[0], center[1], center[2]) #ENU to LLH
+            # ENU to LLH
+            next_lat, next_lon, next_alt = pm.enu2geodetic(path.x[num], path.y[num], center[2], center[0], center[1], center[2])
             # Find next Coordination based on Lookahead=====================================================================
             
             # tx버퍼 클리어 구문

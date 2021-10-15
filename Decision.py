@@ -203,43 +203,47 @@ class QuarticPolynomial:
 
         return xt
 
+# Optimal Frenet Frame 알고리즘 부
 def calc_frenet_paths(c_speed, lateral_position, lateral_speed, acceleration, current_course_position):
     frenet_paths = []
 
     # meter of -road to road one by one
     # calculate 하는 범위를 지정해 주는 곳 map_enable_lane
     for di in np.arange(MAX_LEFT_WIDTH, MAX_RIGHT_WIDTH, D_ROAD_W):
-        # Lateral motion planning
+        # 횡방향 motion planning
         for ti in np.arange(MIN_T, MAX_T, DT):
-            fp = FrenetPath()
+            fp = FrenetPath() # Frenet Frame 초기 파라미터
+            # 미분할 계수들을 설정
             lat_qp = QuinticPolynomial(lateral_position, lateral_speed, acceleration, di, 0.0, 0.0, ti)
 
-            fp.t = [t for t in np.arange(0.0, ti, DT)]
-            fp.d = [lat_qp.calc_point(t) for t in fp.t]
-            fp.d_d = [lat_qp.calc_first_derivative(t) for t in fp.t]
-            fp.d_dd = [lat_qp.calc_second_derivative(t) for t in fp.t]
-            fp.d_ddd = [lat_qp.calc_third_derivative(t) for t in fp.t]
+            fp.t = [t for t in np.arange(0.0, ti, DT)] # 시간 (sec)
+            fp.d = [lat_qp.calc_point(t) for t in fp.t] # 변위
+            fp.d_d = [lat_qp.calc_first_derivative(t) for t in fp.t] # 속도 (1차 미분)
+            fp.d_dd = [lat_qp.calc_second_derivative(t) for t in fp.t] # 가속도 (2차 미분)
+            fp.d_ddd = [lat_qp.calc_third_derivative(t) for t in fp.t] # 가가속도 (3차 미분)
 
-            # Longitudinal motion planning (Velocity keeping)
+            # 종방향 motion planning
             for tv in np.arange(TARGET_SPEED - D_T_S * N_S_SAMPLE,
                                 TARGET_SPEED + D_T_S * N_S_SAMPLE, D_T_S):
-                tfp = copy.deepcopy(fp)
+                tfp = copy.deepcopy(fp) # 주소 복사가 아닌 데이터 복사로 fp가 변할때 같이 변하지 않도록 설정
                 lon_qp = QuarticPolynomial(current_course_position, c_speed, 0.0, tv, 0.0, ti)
-
+                
+                # 위의 [시간 ~ 가가속도] 와 동일
                 tfp.s = [lon_qp.calc_point(t) for t in fp.t]
                 tfp.s_d = [lon_qp.calc_first_derivative(t) for t in fp.t]
                 tfp.s_dd = [lon_qp.calc_second_derivative(t) for t in fp.t]
                 tfp.s_ddd = [lon_qp.calc_third_derivative(t) for t in fp.t]
+                
+                # 가가속도 제곱의 합 구하기 Jerk
+                Jp = sum(np.power(tfp.d_ddd, 2)) # 횡
+                Js = sum(np.power(tfp.s_ddd, 2)) # 종
 
-                Jp = sum(np.power(tfp.d_ddd, 2))  # square of jerk
-                Js = sum(np.power(tfp.s_ddd, 2))  # square of jerk
-
-                # square of diff from target speed
+                # 목표 Velocity와의 차의 제곱
                 ds = (TARGET_SPEED - tfp.s_d[-1]) ** 2
-
+                # cost weight(상수: K_J, K_T, K_D) 
                 tfp.cd = K_J * Jp + K_T * ti + K_D * tfp.d[-1] ** 2
                 tfp.cv = K_J * Js + K_T * ti + K_D * ds
-                tfp.cf = K_LAT * tfp.cd + K_LON * tfp.cv
+                tfp.cf = K_LAT * tfp.cd + K_LON * tfp.cv # Cost
 
                 frenet_paths.append(tfp)
     return frenet_paths
